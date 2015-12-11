@@ -200,6 +200,10 @@ class DocuSignClient(object):
         """Shortcut to perform DELETE operations on DocuSign API."""
         return self._request(method='DELETE', *args, **kwargs)
 
+    def put(self, *args, **kwargs):
+        """Shortcut to perform PUT operations on DocuSign API."""
+        return self._request(method='PUT', *args, **kwargs)
+
     def login_information(self):
         """Return dictionary of /login_information.
 
@@ -460,3 +464,31 @@ class DocuSignClient(object):
               .format(accountId=self.account_id,
                       templateId=templateId)
         return self.get(url)
+
+    def update_envelope_recipients(self, envelopeId, recipients, resend_envelope=False):
+        """Modify recipients in a draft envelope or correct recipient information for an
+        in process envelope"""
+        if not self.account_url:
+            self.login_information()
+        url = '/accounts/{accountId}/envelopes/{envelopeId}/recipients' \
+              .format(accountId=self.account_id,
+                      envelopeId=envelopeId)
+        if resend_envelope:
+            url += '?resend_envelope=true'
+        data = {'signers': [recipient.to_dict() for recipient in recipients]}
+        return self.put(url, data=data)
+
+    def void_envelope(self, envelopeId, voidReason):
+        """Void a single in-process envelope"""
+        if not self.account_url:
+            self.login_information()
+        url = '/accounts/{accountId}/envelopes/{envelopeId}' \
+            .format(accountId=self.account_id,
+                    envelopeId=envelopeId)
+        data = {
+            'status': 'voided',
+            'voidedReason': voidReason
+        }
+        return self.put(url, data=data)
+
+

@@ -415,6 +415,86 @@ class Role(Recipient):
         return data
 
 
+class UpdatedSigner(Recipient):
+    """This structure is used with the "Modify or Correct and Resend Recipient
+    Information" API
+
+    Docusign reference lives at:
+    https://www.docusign.com/p/RESTAPIGuide/RESTAPIGuide.htm#REST API References/Modify or Correct and Resend Recipient Information.htm
+    """
+    attributes = ['recipientId', 'email', 'name', 'routingOrder', 'accessCode',
+                  'requireIdLookup']
+
+    def __init__(self, recipientId, email=None, name=None, routingOrder=None,
+                 accessCode=None, requireIdLookup=None):
+        """Setup. All values other than recipientId are optional."""
+        #: Recipient Id in the existing envelope. Required
+        self.recipientId = recipientId
+
+        #: Email of the recipient. Notification will be sent to this email id.
+        #: This can be a maximum of 100 characters.
+        self.email = email
+
+        #: Full legal name of the recipient. This can be a maximum of 100
+        #: characters.
+        self.name = name
+
+        #: Routing order of the recipient in the envelope.
+        self.routingOrder = routingOrder
+
+        #: This Optional element specifies the access code a recipient has to
+        #: enter to validate the identity.
+        #: This can be a maximum of 50 characters.
+        self.accessCode = accessCode
+
+        #: If set true then the recipient is required to use the specified ID
+        #: check method (including Phone and SMS authentication) to validate
+        #: their identity.
+        self.requireIdLookup = requireIdLookup
+
+    def to_dict(self):
+        """Return dict representation of model.
+
+        >>> recipient = UpdatedSigner(
+        ...     clientUserId='some ID in your DB',
+        ...     email='signer@example.com',
+        ...     name='My Name')
+        >>> role.to_dict() == {
+        ...     'clientUserId': 'some ID in your DB',
+        ...     'email': 'signer@example.com',
+        ...     'name': 'My Name',
+        ... }
+        True
+        >>> role = UpdatedSigner(
+        ...     clientUserId='some ID in your DB',
+        ...     email='signer@example.com',
+        ...     name='My Name',
+        ...     routingOrder=1,
+        ...     accessCode='abc123',
+        ...     requiredIdLookup=True)
+        >>> role.to_dict() == {
+        ...     'clientUserId': 'some ID in your DB',
+        ...     'email': 'signer@example.com',
+        ...     'name': 'My Name',
+        ...     'routingOrder': 1,
+        ...     'accessCode': 'abc123',
+        ...     'requiredIdLookup': True,
+        ... }
+        True
+
+        """
+        data = {
+            'recipientId': self.recipientId
+        }
+
+        for attr_name in self.attributes:
+            attr_val = getattr(self, attr_name)
+            if attr_val is not None:
+                data[attr_name] = attr_val
+
+        return data
+
+
 class Document(DocuSignObject):
     """A document to sign."""
     attributes = ['documentId', 'name']
@@ -768,3 +848,13 @@ class Envelope(DocuSignObject):
     def get_certificate(self, client=None):
         """Use ``client`` to download special document: certificate."""
         return self.get_document(documentId='certificate', client=client)
+
+    def void(self, voidReason, client=None):
+        """Use ``client`` to fetch embedded signing URL for recipient.
+
+        If ``client`` is ``None``, :attr:`client` is tried.
+
+        """
+        if client is None:
+            client = self.client
+        return client.void_envelope(self.envelopeId, voidReason)
