@@ -487,3 +487,17 @@ class DocuSignClient(object):
         url = '/accounts/{accountId}/connect/failures' \
               .format(accountId=self.account_id)
         return self.get(url)['failures']
+        
+    def update_envelope_recipients(self, envelopeId, recipients, resend_envelope=False):
+        """Modify recipients in a draft envelope or correct recipient information for an
+        in process envelope"""
+        if not self.account_url:
+            self.login_information()
+        url = '/accounts/{accountId}/envelopes/{envelopeId}/recipients' \
+              .format(accountId=self.account_id,
+                      envelopeId=envelopeId)
+        if resend_envelope:
+            url += '?resend_envelope=true'
+        data = {'signers': [recipient.to_dict() for recipient in recipients]}
+        return self.put(url, data=data)
+
