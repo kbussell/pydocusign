@@ -5,7 +5,7 @@ except ImportError:  # Python 2 fallback.
     import mock
 
 from pydocusign import DocuSignObject, SignHereTab, ApproveTab, Signer, Role, \
-    Document, EventNotification, Envelope, DocuSignClient
+    Document, EventNotification, Envelope, DocuSignClient, UpdatedSigner
 from pydocusign.models import ENVELOPE_STATUS_SENT, RECIPIENT_STATUS_SENT, \
     ENVELOPE_STATUS_DRAFT
 
@@ -159,6 +159,35 @@ class RecipientsTest(unittest.TestCase):
             },
             'name': 'My Name',
             'roleName': 'Role 1',
+        })
+
+    def test_serialize_updated_signer(self):
+        signer = UpdatedSigner(
+            clientUserId='some ID in your DB',
+            email='signer@example.com',
+            name='My Name')
+        self.assertEqual(signer.to_dict(), {
+            'recipientId': None,
+            'clientUserId': 'some ID in your DB',
+            'email': 'signer@example.com',
+            'name': 'My Name',
+        })
+
+        signer = UpdatedSigner(
+            clientUserId='some ID in your DB',
+            email='signer@example.com',
+            name='My Name',
+            routingOrder=1,
+            accessCode='abc123',
+            requireIdLookup=True)
+        self.assertEqual(signer.to_dict(), {
+            'recipientId': None,
+            'clientUserId': 'some ID in your DB',
+            'email': 'signer@example.com',
+            'name': 'My Name',
+            'routingOrder': 1,
+            'accessCode': 'abc123',
+            'requireIdLookup': True,
         })
 
 

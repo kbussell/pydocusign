@@ -340,6 +340,18 @@ class Role(Recipient):
         return data
 
 
+class UpdatedSigner(Recipient):
+    """This structure is used with the "Modify or Correct and Resend Recipient
+    Information" API
+
+    Docusign reference lives at:
+    https://www.docusign.com/p/RESTAPIGuide/RESTAPIGuide.htm#REST API References/Modify or Correct and Resend Recipient Information.htm
+    """
+    attributes = ['recipientId', 'email', 'name', 'routingOrder', 'accessCode',
+                  'requireIdLookup', 'clientUserId']
+    required_attributes = ['recipientId']
+
+
 class Document(DocuSignObject):
     """A document to sign."""
     attributes = ['documentId', 'name']
