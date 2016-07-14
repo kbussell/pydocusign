@@ -501,3 +501,12 @@ class DocuSignClient(object):
         data = {'signers': [recipient.to_dict() for recipient in recipients]}
         return self.put(url, data=data)
 
+    def delete_envelope_recipients(self, envelopeId, recipientIds):
+        """Deletes one or more recipients from a draft or sent envelope."""
+        if not self.account_url:
+            self.login_information()
+        url = '/accounts/{accountId}/envelopes/{envelopeId}/recipients' \
+            .format(accountId=self.account_id,
+                    envelopeId=envelopeId)
+        data = {'signers': [{'recipientId': id_} for id_ in recipientIds]}
+        return self.delete(url, data=data)
